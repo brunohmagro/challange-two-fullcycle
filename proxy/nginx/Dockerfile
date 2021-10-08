@@ -1,7 +1,7 @@
-FROM nginx:latest
+FROM nginx:1.15.0-alpine
 
-COPY html/ /usr/share/nginx/html
+RUN rm /etc/nginx/conf.d/default.conf
 
-ENTRYPOINT [ "/docker-entrypoint.sh" ]
+COPY nginx.conf /etc/nginx/conf.d
 
-CMD ["nginx", "-g", "daemon off;"]
+RUN mkdir /usr/src/app -p && touch /usr/src/app/index.js

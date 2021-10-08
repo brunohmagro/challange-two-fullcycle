@@ -1,0 +1,48 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: ./proxy/node
+    image: brunohmagro/node:challange
+    container_name: app
+    entrypoint: dockerize -wait tcp://db:3306 -timeout 20s docker-entrypoint.sh yarn dev
+    networks:
+      - node-network-challange
+    volumes:
+      - ./proxy/node:/usr/src/app
+    tty: true
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7
+    command: --innodb-use-native-aio=0
+    container_name: db
+    restart: always
+    tty: true
+    volumes:
+      - ./proxy/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=nodedb
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - node-network-challange
+  
+  nginx:
+    build:
+      context: ./proxy/nginx
+    image: brunohmagro/nginx:challange
+    container_name: nginx
+    networks:
+      - node-network-challange
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+
+networks:
+  node-network-challange:
+    driver: bridge
